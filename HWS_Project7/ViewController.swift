@@ -28,9 +28,10 @@ class ViewController: UITableViewController {
                     return
                 }
             }
+            self.showError()
         }
         
-        showError()
+        
         
 //        if let url = URL(string: urlString) {
 //
@@ -51,9 +52,12 @@ class ViewController: UITableViewController {
     
     
     func showError(){
-        let ac = UIAlertController(title: "Error", message: "Loading Error: Check Your Connection", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
+        DispatchQueue.main.async {
+            let ac = UIAlertController(title: "Error", message: "Loading Error: Check Your Connection", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(ac, animated: true)
+        }
+        
     }
     
     
@@ -62,7 +66,10 @@ class ViewController: UITableViewController {
         
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
             petitions = jsonPetitions.results
-            tableView.reloadData()
+            
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
 
