@@ -14,6 +14,12 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        performSelector(inBackground: #selector(fetchJson), with: nil)
+           
+    }
+    
+    @objc func fetchJson(){
+        
         let urlString: String
         if navigationController?.tabBarItem.tag == 0 {
            urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
@@ -21,43 +27,13 @@ class ViewController: UITableViewController {
             urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
         }
         
-        DispatchQueue.global(qos: .userInitiated).async {
             if let url = URL(string: urlString) {
                 if let data = try? Data.init(contentsOf: url) {
-                    self.parse(json: data)
+                    parse(json: data)
                     return
                 }
             }
-            self.showError()
-        }
-        
-        
-        
-//        if let url = URL(string: urlString) {
-//
-//            //インターネットが接続されていない時のエラーチェック → try?
-//            if let data = try? Data(contentsOf: url) {
-//
-//                //データ取得
-//                parse(json: data)
-//
-//            } else {
-//                showError()
-//            }
-//        } else {
-//            showError()
-//        }
-           
-    }
-    
-    
-    func showError(){
-        DispatchQueue.main.async {
-            let ac = UIAlertController(title: "Error", message: "Loading Error: Check Your Connection", preferredStyle: .alert)
-            ac.addAction(UIAlertAction(title: "OK", style: .default))
-            self.present(ac, animated: true)
-        }
-        
+        performSelector(onMainThread: #selector(showError), with: nil, waitUntilDone: false)
     }
     
     
@@ -66,12 +42,22 @@ class ViewController: UITableViewController {
         
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
             petitions = jsonPetitions.results
-            
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+            tableView.performSelector(onMainThread: #selector(tableView.reloadData), with: nil, waitUntilDone: false)
+        } else {
+            performSelector(onMainThread: #selector(showError), with: nil, waitUntilDone: false)
         }
     }
+    
+    
+    @objc func showError(){
+        
+            let ac = UIAlertController(title: "Error", message: "Loading Error: Check Your Connection", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(ac, animated: true)
+            
+    }
+    
+ 
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return petitions.count
