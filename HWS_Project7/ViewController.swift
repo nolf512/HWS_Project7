@@ -21,20 +21,31 @@ class ViewController: UITableViewController {
             urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
         }
         
-        if let url = URL(string: urlString) {
-            
-            //インターネットが接続されていない時のエラーチェック → try?
-            if let data = try? Data(contentsOf: url) {
-                
-                //データ取得
-                parse(json: data)
-                
-            } else {
-                showError()
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let url = URL(string: urlString) {
+                if let data = try? Data.init(contentsOf: url) {
+                    self.parse(json: data)
+                    return
+                }
             }
-        } else {
-            showError()
         }
+        
+        showError()
+        
+//        if let url = URL(string: urlString) {
+//
+//            //インターネットが接続されていない時のエラーチェック → try?
+//            if let data = try? Data(contentsOf: url) {
+//
+//                //データ取得
+//                parse(json: data)
+//
+//            } else {
+//                showError()
+//            }
+//        } else {
+//            showError()
+//        }
            
     }
     
